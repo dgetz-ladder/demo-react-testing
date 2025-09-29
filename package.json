@@ -17,9 +17,6 @@
     "eject": "react-scripts eject",
     "e2e": "cd e2e && jest"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -33,6 +30,7 @@
     ]
   },
   "devDependencies": {
-    "playwright": "^1.23.4"
+    "playwright": "^1.23.4",
+    "jest": "^27.5.1"
   }
 }
