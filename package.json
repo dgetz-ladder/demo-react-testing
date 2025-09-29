@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^14.3.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-scripts": "^5.0.1"
   },
   "scripts": {
@@ -15,10 +15,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "e2e": "cd e2e && jest"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
+    "e2e": "cd e2e && jest",
+    "e2e:screenshots": "cd e2e && jest screenshot_tests.js",
+    "e2e:update-screenshots": "cd e2e && UPDATE_SCREENSHOTS=true jest screenshot_tests.js",
+    "e2e:functional": "cd e2e && jest test_app.js"
   },
   "browserslist": {
     "production": [
@@ -33,6 +33,9 @@
     ]
   },
   "devDependencies": {
-    "playwright": "^1.23.4"
+    "jest": "^27.5.1",
+    "pixelmatch": "^7.1.0",
+    "playwright": "^1.23.4",
+    "pngjs": "^7.0.0"
   }
 }

@@ -1,0 +1,6 @@
+# Screenshot test outputs
+screenshots/actual/
+screenshots/diff/
+
+# Keep baseline screenshots in version control
+!screenshots/baseline/

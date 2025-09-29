@@ -1,0 +1,105 @@
+const fs = require('fs');
+const path = require('path');
+const { PNG } = require('pngjs');
+
+const { screenshotsDir, baselineDir, actualDir, diffDir } = global.screenshotConfig;
+const SCREENSHOTS_DIR = path.join(__dirname, '..', screenshotsDir);
+const BASELINE_DIR = path.join(SCREENSHOTS_DIR, baselineDir);
+const ACTUAL_DIR = path.join(SCREENSHOTS_DIR, actualDir);
+const DIFF_DIR = path.join(SCREENSHOTS_DIR, diffDir);
+
+const assert = (value, error) => value || (() => { throw new Error(error); })();
+
+const logMismatch = (testName, result) => {
+    console.log(`${testName} screenshot mismatch: ${result.pixelDifference} pixels (${result.pixelPercentage}%)`);
+    console.log(`Baseline: ${result.baselinePath}`);
+    console.log(`Actual: ${result.actualPath}`);
+    console.log(`Diff: ${result.diffPath}`);
+};
+
+const captureScreenshot = async (page, testName, options = {}) => {
+    const fileName = `${testName}.png`;
+    const actualPath = path.join(ACTUAL_DIR, fileName);
+
+    [BASELINE_DIR, ACTUAL_DIR, DIFF_DIR].forEach(dir => {
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    });
+
+    await page.screenshot({ 
+        fullPage: true, 
+        animations: 'disabled', 
+        ...options, 
+        path: actualPath 
+    });
+
+    return { testName, fileName, actualPath };
+};
+
+const captureElementScreenshot = async (page, selector, testName, options = {}) => 
+    await captureScreenshot(page, testName, {
+        clip: await assert(await page.$(selector), `Element not found: ${selector}`).boundingBox(),
+        ...options
+    });
+
+const compareDiff = (capture) => {
+    const { testName, fileName, actualPath } = capture;
+    const baselinePath = path.join(BASELINE_DIR, fileName);
+    const diffPath = path.join(DIFF_DIR, fileName);
+
+    if (!fs.existsSync(baselinePath)) {
+        fs.copyFileSync(actualPath, baselinePath);
+        return {
+            isNewBaseline: true,
+            message: `Created new baseline screenshot: ${fileName}`
+        };
+    }
+
+    const baseline = PNG.sync.read(fs.readFileSync(baselinePath));
+    const actual = PNG.sync.read(fs.readFileSync(actualPath));
+    
+    const { width, height } = baseline;
+    const diff = new PNG({ width, height });
+    const pixelmatch = require('pixelmatch').default || require('pixelmatch');
+    
+    const pixelDifference = pixelmatch(
+        baseline.data,
+        actual.data,
+        diff.data,
+        width,
+        height,
+        { threshold: 0.2 }
+    );
+
+    if (pixelDifference > 0) {
+        fs.writeFileSync(diffPath, PNG.sync.write(diff));
+    }
+
+    const pixelPercentage = (pixelDifference / (width * height)) * 100;
+
+    return {
+        isNewBaseline: false,
+        pixelDifference,
+        pixelPercentage: pixelPercentage.toFixed(2),
+        isMatch: pixelDifference === 0,
+        baselinePath,
+        actualPath,
+        diffPath: pixelDifference > 0 ? diffPath : null
+    };
+};
+
+const expectMatch = (testName, result) => {
+    if (result.isNewBaseline) {
+        console.log(result.message);
+    } else {
+        expect(result.isMatch).toBe(true);
+        if (!result.isMatch) logMismatch(testName, result);
+    }
+    return result;
+};
+
+module.exports = {
+    captureScreenshot,
+    captureElementScreenshot,
+    compareDiff,
+    expectMatch
+};
