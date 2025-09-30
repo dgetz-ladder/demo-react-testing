@@ -14,6 +14,7 @@
     "e2e": "cd e2e && jest",
     "e2e:screenshots": "cd e2e && jest screenshot_tests.js",
     "e2e:screenshots:smartui": "export $(grep -v '^#' .env.local | xargs) && cd e2e && USE_SMARTUI=true jest screenshot_tests.js",
+    "e2e:screenshots:percy": "export $(grep -v '^#' .env.local | xargs) && cd e2e && USE_PERCY=true npx percy exec -- jest screenshot_tests.js",
     "e2e:update-screenshots": "cd e2e && UPDATE_SCREENSHOTS=true jest screenshot_tests.js",
     "e2e:functional": "cd e2e && jest test_app.js"
   },
@@ -32,6 +33,8 @@
   "devDependencies": {
     "@lambdatest/playwright-driver": "^1.0.3",
     "@lambdatest/smartui-cli": "^4.1.34",
+    "@percy/cli": "^1.31.2",
+    "@percy/playwright": "^1.0.9",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^14.3.0",

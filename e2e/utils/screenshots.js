@@ -2,13 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const { PNG } = require('pngjs');
 const { compareDiffSmartUI } = require('./smartui-adapter');
+const { compareDiffPercy } = require('./percy-adapter');
 
 const { screenshotsDir, baselineDir, actualDir, diffDir } = global.screenshotConfig;
 const USE_SMARTUI = process.env.USE_SMARTUI === 'true';
+const USE_PERCY = process.env.USE_PERCY === 'true';
 const SCREENSHOTS_DIR = path.join(__dirname, '..', screenshotsDir);
 const BASELINE_DIR = path.join(SCREENSHOTS_DIR, baselineDir);
 const ACTUAL_DIR = path.join(SCREENSHOTS_DIR, actualDir);
 const DIFF_DIR = path.join(SCREENSHOTS_DIR, diffDir);
+
+// Store page context for Percy (since Percy needs the live page object)
+let currentPage = null;
+let currentSelector = null;
 
 const assert = (value, error) => value || (() => { throw new Error(error); })();
 
@@ -26,6 +32,10 @@ const captureScreenshot = async (page, testName, options = {}) => {
     [BASELINE_DIR, ACTUAL_DIR, DIFF_DIR].forEach(dir => {
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     });
+
+    // Store page for Percy (Percy needs the live page object)
+    currentPage = page;
+    currentSelector = null;
 
     await page.screenshot({ 
         fullPage: true, 
@@ -52,6 +62,10 @@ const captureElementScreenshot = async (page, selector, testName, options = {}) 
     
     // Wait for element to be stable
     await element.waitForElementState('stable');
+    
+    // Store page and selector for Percy
+    currentPage = page;
+    currentSelector = selector;
     
     const boundingBox = await element.boundingBox();
     return await captureScreenshot(page, testName, {
@@ -107,8 +121,15 @@ const compareDiffLocal = (capture) => {
     };
 };
 
-const compareDiff = async (capture) => 
-    USE_SMARTUI ? await compareDiffSmartUI(capture) : compareDiffLocal(capture);
+const compareDiff = async (capture) => {
+    if (USE_PERCY) {
+        return await compareDiffPercy(capture, currentPage, currentSelector);
+    } else if (USE_SMARTUI) {
+        return await compareDiffSmartUI(capture);
+    } else {
+        return compareDiffLocal(capture);
+    }
+};
 
 const expectMatch = (testName, result) => {
     if (result.isNewBaseline) {

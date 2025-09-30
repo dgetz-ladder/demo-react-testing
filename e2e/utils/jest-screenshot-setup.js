@@ -78,3 +78,11 @@ if (process.env.USE_SMARTUI === 'true') {
     await batchUploadToSmartUI();
   }, 120000); // 2 minute timeout for upload
 }
+
+// Percy finalization after all tests
+if (process.env.USE_PERCY === 'true') {
+  afterAll(async () => {
+    const { finalizePercy } = require('./percy-adapter');
+    await finalizePercy();
+  }, 30000);
+}

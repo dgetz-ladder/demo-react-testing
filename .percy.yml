@@ -1,0 +1,17 @@
+version: 2
+snapshot:
+  widths:
+    - 375
+    - 1280
+  min-height: 1024
+  enable-javascript: true
+  percy-css: |
+    /* Hide dynamic elements that change between snapshots */
+    .App-logo {
+      animation: none !important;
+    }
+discovery:
+  disable-cache: false
+  allowed-hostnames:
+    - localhost
+    - 127.0.0.1
