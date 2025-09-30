@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { PNG } = require('pngjs');
+const { compareDiffSmartUI } = require('./smartui-adapter');
 
 const { screenshotsDir, baselineDir, actualDir, diffDir } = global.screenshotConfig;
+const USE_SMARTUI = process.env.USE_SMARTUI === 'true';
 const SCREENSHOTS_DIR = path.join(__dirname, '..', screenshotsDir);
 const BASELINE_DIR = path.join(SCREENSHOTS_DIR, baselineDir);
 const ACTUAL_DIR = path.join(SCREENSHOTS_DIR, actualDir);
@@ -35,13 +37,31 @@ const captureScreenshot = async (page, testName, options = {}) => {
     return { testName, fileName, actualPath };
 };
 
-const captureElementScreenshot = async (page, selector, testName, options = {}) => 
-    await captureScreenshot(page, testName, {
-        clip: await assert(await page.$(selector), `Element not found: ${selector}`).boundingBox(),
+const captureElementScreenshot = async (page, selector, testName, options = {}) => {
+    const element = await assert(await page.$(selector), `Element not found: ${selector}`);
+    
+    // Force disable all animations and transitions on the element
+    await page.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        if (el) {
+            el.style.animation = 'none !important';
+            el.style.transition = 'none !important';
+            el.style.animationPlayState = 'paused !important';
+        }
+    }, selector);
+    
+    // Wait for element to be stable
+    await element.waitForElementState('stable');
+    
+    const boundingBox = await element.boundingBox();
+    return await captureScreenshot(page, testName, {
+        clip: boundingBox,
+        animations: 'disabled',
         ...options
     });
+};
 
-const compareDiff = (capture) => {
+const compareDiffLocal = (capture) => {
     const { testName, fileName, actualPath } = capture;
     const baselinePath = path.join(BASELINE_DIR, fileName);
     const diffPath = path.join(DIFF_DIR, fileName);
@@ -86,6 +106,9 @@ const compareDiff = (capture) => {
         diffPath: pixelDifference > 0 ? diffPath : null
     };
 };
+
+const compareDiff = async (capture) => 
+    USE_SMARTUI ? await compareDiffSmartUI(capture) : compareDiffLocal(capture);
 
 const expectMatch = (testName, result) => {
     if (result.isNewBaseline) {

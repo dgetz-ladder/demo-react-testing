@@ -13,7 +13,11 @@ npm run e2e:functional # run functional tests only
 npm run e2e:screenshots # run screenshot tests only
 npm run e2e:update-screenshots # update baseline screenshots
 
+# LambdaTest SmartUI
+#npx smartui config:create
 export $(grep -v '^#' .env.local | xargs)
+npm run e2e:screenshots:smartui
+# https://smartui.lambdatest.com/
 ```
 
 Technologies

@@ -26,30 +26,39 @@ describe("Visual Regression Tests", () => {
     it("should match the full page screenshot", async () => {
         await page.waitForTimeout(1000);
         const capture = await captureScreenshot(page, 'Full page', { fullPage: true });
-        expectMatch('Full page', compareDiff(capture));
+        expectMatch('Full page', await compareDiff(capture));
     });
 
     it("should match the header section screenshot", async () => {
         await page.waitForTimeout(500);
         const capture = await captureElementScreenshot(page, '.App-header', 'Header section');
-        expectMatch('Header section', compareDiff(capture));
+        expectMatch('Header section', await compareDiff(capture));
     });
 
     it("should match the React logo screenshot", async () => {
-        await page.waitForTimeout(500);
+        // Wait for logo to be visible and disable its spinning animation
+        await page.waitForSelector('.App-logo', { state: 'visible' });
+        await page.evaluate(() => {
+            const logo = document.querySelector('.App-logo');
+            if (logo) {
+                logo.style.animation = 'none';
+                logo.style.transform = 'rotate(0deg)';
+            }
+        });
+        await page.waitForTimeout(100); // Brief wait for style application
         const capture = await captureElementScreenshot(page, '.App-logo', 'React logo');
-        expectMatch('React logo', compareDiff(capture));
+        expectMatch('React logo', await compareDiff(capture));
     });
 
     it("should match the mobile viewport screenshot", async () => {
         await page.waitForTimeout(1000);
         const capture = await captureScreenshot(page, 'Mobile viewport', { fullPage: true });
-        expectMatch('Mobile viewport', compareDiff(capture));
+        expectMatch('Mobile viewport', await compareDiff(capture));
     });
 
     it("should match the learn react link screenshot", async () => {
         await page.waitForTimeout(500);
         const capture = await captureElementScreenshot(page, '.App-link', 'Learn React link');
-        expectMatch('Learn React link', compareDiff(capture));
+        expectMatch('Learn React link', await compareDiff(capture));
     });
 });

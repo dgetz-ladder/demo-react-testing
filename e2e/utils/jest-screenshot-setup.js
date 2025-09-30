@@ -70,3 +70,11 @@ if (process.env.UPDATE_SCREENSHOTS === 'true') {
     console.log('Updated all baseline screenshots');
   });
 }
+
+// SmartUI batch upload after all tests
+if (process.env.USE_SMARTUI === 'true') {
+  afterAll(async () => {
+    const { batchUploadToSmartUI } = require('./smartui-adapter');
+    await batchUploadToSmartUI();
+  }, 120000); // 2 minute timeout for upload
+}
