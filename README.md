@@ -46,7 +46,35 @@ npm run e2e:selenium:screenshots:percy # https://percy.io/
 npm run e2e:selenium:screenshots:smartui # https://smartui.lambdatest.com/
 ```
 
-Release notes
+## 🗂️ Project Structure
+
+```
+e2e/
+├── Config
+│   ├── playwright.config.js      Playwright settings
+│   ├── selenium.config.js        Selenium settings
+│   ├── jest-base.config.js       Shared base configuration
+│   ├── jest.config.js            Playwright test config
+│   └── jest-selenium.config.js   Selenium test config
+│
+├── Tests
+│   └── specs/
+│       ├── screenshot_tests.js
+│       ├── selenium_screenshot_tests.js
+│       └── test_app.js
+│
+└── Utils
+    ├── screenshot-base.js         Shared screenshot logic
+    ├── screenshots.js             Playwright screenshots
+    ├── selenium-screenshots.js    Selenium screenshots
+    ├── percy-adapter-unified.js   Percy (both frameworks)
+    ├── smartui-adapter.js         SmartUI integration
+    └── jest-setup.js              Unified test setup
+```
+
+See [SIMPLIFIED_STRUCTURE.md](./SIMPLIFIED_STRUCTURE.md) for architecture details.
+
+## Release notes
 * Warning: Playwright's `slowMo` setting can be temperamental, and if set too high the tests often fail. The consistency of `slowMo` also seems to vary from browser to browser.
 
 ## Technologies
