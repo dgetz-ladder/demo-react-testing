@@ -1,14 +1,25 @@
+// supports both Percy and SmartUI
+
 const fs = require('fs');
 const path = require('path');
-const { ensureDirectories, routeComparison, expectMatch, ACTUAL_DIR } = require('./screenshot-base');
+const { ensureDirectories, routeComparison, expectMatch, ACTUAL_DIR } = require('./screenshot-comparison');
 
 // Store page context for Percy
 let currentPage = null;
 let currentSelector = null;
 
-/**
- * Capture full page screenshot with Playwright
- */
+const disableElementAnimations = async (page, selector) => {
+    await page.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        if (el) {
+            el.style.animation = 'none !important';
+            el.style.transition = 'none !important';
+            el.style.animationPlayState = 'paused !important';
+            el.style.transform = 'rotate(0deg)';
+        }
+    }, selector);
+};
+
 const captureScreenshot = async (page, testName, options = {}) => {
     const fileName = `${testName}.png`;
     const actualPath = path.join(ACTUAL_DIR, fileName);
@@ -29,23 +40,11 @@ const captureScreenshot = async (page, testName, options = {}) => {
     return { testName, fileName, actualPath };
 };
 
-/**
- * Capture element screenshot with Playwright
- */
 const captureElementScreenshot = async (page, selector, testName, options = {}) => {
     const element = await page.$(selector);
     if (!element) throw new Error(`Element not found: ${selector}`);
     
-    // Disable animations
-    await page.evaluate((sel) => {
-        const el = document.querySelector(sel);
-        if (el) {
-            el.style.animation = 'none !important';
-            el.style.transition = 'none !important';
-            el.style.animationPlayState = 'paused !important';
-        }
-    }, selector);
-    
+    await disableElementAnimations(page, selector);
     await element.waitForElementState('stable');
     
     // Store context for Percy
@@ -60,9 +59,6 @@ const captureElementScreenshot = async (page, selector, testName, options = {}) 
     });
 };
 
-/**
- * Compare screenshot using current mode (local/percy/smartui)
- */
 const compareDiff = async (capture) => {
     return await routeComparison(capture, currentPage, currentSelector);
 };
@@ -71,5 +67,6 @@ module.exports = {
     captureScreenshot,
     captureElementScreenshot,
     compareDiff,
-    expectMatch
+    expectMatch,
+    disableElementAnimations
 };

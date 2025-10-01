@@ -1,15 +1,26 @@
+// supports both Percy and SmartUI
+
 const fs = require('fs');
 const path = require('path');
 const { By } = require('selenium-webdriver');
-const { ensureDirectories, routeComparison, expectMatch, ACTUAL_DIR } = require('./screenshot-base');
+const { ensureDirectories, routeComparison, expectMatch, ACTUAL_DIR } = require('./screenshot-comparison');
 
 // Store driver context for Percy
 let currentDriver = null;
 let currentElement = null;
 
-/**
- * Capture full page screenshot with Selenium
- */
+const disableElementAnimations = async (driver, selector) => {
+    await driver.executeScript(`
+        const el = document.querySelector('${selector}');
+        if (el) {
+            el.style.animation = 'none !important';
+            el.style.transition = 'none !important';
+            el.style.animationPlayState = 'paused !important';
+            el.style.transform = 'rotate(0deg)';
+        }
+    `);
+};
+
 const captureScreenshot = async (driver, testName, options = {}) => {
     const fileName = `${testName}.png`;
     const actualPath = path.join(ACTUAL_DIR, fileName);
@@ -26,9 +37,6 @@ const captureScreenshot = async (driver, testName, options = {}) => {
     return { testName, fileName, actualPath };
 };
 
-/**
- * Capture element screenshot with Selenium
- */
 const captureElementScreenshot = async (driver, selector, testName, options = {}) => {
     const fileName = `${testName}.png`;
     const actualPath = path.join(ACTUAL_DIR, fileName);
@@ -38,16 +46,7 @@ const captureElementScreenshot = async (driver, selector, testName, options = {}
     const element = await driver.findElement(By.css(selector));
     if (!element) throw new Error(`Element not found: ${selector}`);
 
-    // Disable animations
-    await driver.executeScript(`
-        const el = document.querySelector('${selector}');
-        if (el) {
-            el.style.animation = 'none !important';
-            el.style.transition = 'none !important';
-            el.style.animationPlayState = 'paused !important';
-        }
-    `);
-
+    await disableElementAnimations(driver, selector);
     await driver.sleep(100);
 
     // Store context for Percy
@@ -60,9 +59,6 @@ const captureElementScreenshot = async (driver, selector, testName, options = {}
     return { testName, fileName, actualPath };
 };
 
-/**
- * Compare screenshot using current mode (local/percy/smartui)
- */
 const compareDiff = async (capture) => {
     return await routeComparison(capture, currentDriver, currentElement);
 };
@@ -71,5 +67,6 @@ module.exports = {
     captureScreenshot,
     captureElementScreenshot,
     compareDiff,
-    expectMatch
+    expectMatch,
+    disableElementAnimations
 };

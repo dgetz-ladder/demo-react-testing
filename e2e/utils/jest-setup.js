@@ -27,9 +27,6 @@ expect.extend({
   },
 });
 
-/**
- * Update baseline screenshots
- */
 const updateBaseline = (testName = 'all') => {
     if (testName === 'all') {
         if (fs.existsSync(ACTUAL_DIR)) {
@@ -77,7 +74,7 @@ if (process.env.USE_SMARTUI === 'true') {
 // Percy finalization
 if (process.env.USE_PERCY === 'true') {
   afterAll(async () => {
-    const { finalizePercy } = require('./percy-adapter-unified');
+    const { finalizePercy } = require('./percy-adapter');
     await finalizePercy();
   }, 30000);
 }

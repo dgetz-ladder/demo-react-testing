@@ -5,18 +5,13 @@ let percySnapshots = [];
 let percyInitialized = false;
 let percySDK = null;
 
-/**
- * Detect framework from driver/page object
- */
+// works with both Playwright and Selenium
 const detectFramework = (driverOrPage) => {
     if (driverOrPage.takeScreenshot) return 'selenium';
     if (driverOrPage.screenshot) return 'playwright';
     throw new Error('Unknown framework - driver/page object not recognized');
 };
 
-/**
- * Initialize Percy SDK for the appropriate framework
- */
 const initPercy = async (framework) => {
     if (percyInitialized && percySDK) {
         return percySDK;
@@ -44,9 +39,6 @@ const initPercy = async (framework) => {
     }
 };
 
-/**
- * Upload screenshot to Percy (works with both Playwright and Selenium)
- */
 const uploadToPercy = async (driverOrPage, capture, element = null, options = {}) => {
     const framework = detectFramework(driverOrPage);
     const percy = await initPercy(framework);
@@ -98,12 +90,8 @@ const uploadToPercy = async (driverOrPage, capture, element = null, options = {}
     }
 };
 
-/**
- * Compare using Percy - returns result compatible with local comparison
- */
 const compareDiffPercy = async (capture, driverOrPage, element = null, options = {}) => {
     const result = await uploadToPercy(driverOrPage, capture, element, options);
-    
     return {
         isNewBaseline: false,
         isMatch: result.success,
@@ -116,9 +104,6 @@ const compareDiffPercy = async (capture, driverOrPage, element = null, options =
     };
 };
 
-/**
- * Finalize Percy test run
- */
 const finalizePercy = async () => {
     if (percySnapshots.length > 0) {
         console.log(`\n[Percy] Successfully uploaded ${percySnapshots.length} snapshots`);

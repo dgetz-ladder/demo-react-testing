@@ -8,18 +8,12 @@ const BASELINE_DIR = path.join(SCREENSHOTS_DIR, baselineDir);
 const ACTUAL_DIR = path.join(SCREENSHOTS_DIR, actualDir);
 const DIFF_DIR = path.join(SCREENSHOTS_DIR, diffDir);
 
-/**
- * Ensure screenshot directories exist
- */
 const ensureDirectories = () => {
     [BASELINE_DIR, ACTUAL_DIR, DIFF_DIR].forEach(dir => {
         if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     });
 };
 
-/**
- * Log screenshot mismatch details
- */
 const logMismatch = (testName, result) => {
     console.log(`${testName} screenshot mismatch: ${result.pixelDifference} pixels (${result.pixelPercentage}%)`);
     console.log(`Baseline: ${result.baselinePath}`);
@@ -27,9 +21,6 @@ const logMismatch = (testName, result) => {
     console.log(`Diff: ${result.diffPath}`);
 };
 
-/**
- * Compare screenshots locally using pixelmatch
- */
 const compareDiffLocal = (capture) => {
     const { testName, fileName, actualPath } = capture;
     const baselinePath = path.join(BASELINE_DIR, fileName);
@@ -76,15 +67,12 @@ const compareDiffLocal = (capture) => {
     };
 };
 
-/**
- * Route to appropriate comparison method
- */
 const routeComparison = async (capture, driverOrPage = null, element = null) => {
     const USE_PERCY = process.env.USE_PERCY === 'true';
     const USE_SMARTUI = process.env.USE_SMARTUI === 'true';
 
     if (USE_PERCY && driverOrPage) {
-        const { compareDiffPercy } = require('./percy-adapter-unified');
+        const { compareDiffPercy } = require('./percy-adapter');
         return await compareDiffPercy(capture, driverOrPage, element);
     } else if (USE_SMARTUI) {
         const { compareDiffSmartUI } = require('./smartui-adapter');
@@ -94,9 +82,6 @@ const routeComparison = async (capture, driverOrPage = null, element = null) => 
     }
 };
 
-/**
- * Expect screenshot to match baseline
- */
 const expectMatch = (testName, result) => {
     if (result.isNewBaseline) {
         console.log(result.message);

@@ -1,4 +1,4 @@
-const { Builder, Browser, By } = require('selenium-webdriver');
+const { Builder, Browser, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
 const getChromeOptions = (mobile = false) => {
@@ -32,6 +32,7 @@ const createDriver = async (mobile = false) =>
 module.exports = {
     Browser,
     By,
+    until,
     createDriver,
     getChromeOptions
 };

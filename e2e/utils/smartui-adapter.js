@@ -15,8 +15,7 @@ const uploadToSmartUI = async (capture) => {
         throw new Error('LambdaTest credentials not found. Set LT_USERNAME and LT_ACCESS_KEY environment variables.');
     }
     
-    // Queue screenshot for batch upload
-    allScreenshots.push(capture);
+    allScreenshots.push(capture); // Queue screenshot for batch upload
     
     return {
         success: true,
@@ -58,7 +57,6 @@ const batchUploadToSmartUI = async () => {
 
 const compareDiffSmartUI = async (capture) => {
     const result = await uploadToSmartUI(capture);
-    
     return {
         isNewBaseline: false,
         isMatch: result.success,

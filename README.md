@@ -1,4 +1,4 @@
-# React App with Playwright E2E Testing
+# React App with E2E web automation testing (w/ screenshots)
 
 Demonstration of **complete E2E testing solution**, supporting:
 - **2 automation frameworks** (Playwright & Selenium)
@@ -6,9 +6,7 @@ Demonstration of **complete E2E testing solution**, supporting:
 - **6 total configurations** (every combination of framework × mode)
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                    TESTING CONFIGURATIONS                      │
-├──────────────┬─────────────┬─────────────┬─────────────────────┤
+┌──────────────┬─────────────┬─────────────┬─────────────────────┐
 │ Framework    │ Local       │ Percy       │ SmartUI             │
 ├──────────────┼─────────────┼─────────────┼─────────────────────┤
 │ Playwright   │ ✅ Working  │ ✅ Working  │ ✅ Working          │
@@ -20,30 +18,26 @@ Demonstration of **complete E2E testing solution**, supporting:
 
 ```sh
 npm install
-npm start # react dev server
-npm test # run unit tests
+npm start # Vite dev server
+npm test  # Unit tests
 
-# Playwright E2E Tests
-npm run e2e # run all e2e tests
-npm run e2e:functional # run functional tests only
-npm run e2e:screenshots # run screenshot tests only (local)
-npm run e2e:update-screenshots # update baseline screenshots
+# E2E Tests
+npm run e2e            # All Playwright e2e tests
+npm run e2e:functional # Functional tests only
 
-# Selenium E2E Tests
-npm run e2e:selenium # run all selenium tests
-npm run e2e:selenium:screenshots # run selenium screenshot tests (local)
-npm run e2e:selenium:update-screenshots # update selenium baseline screenshots
+# Playwright Visual Tests
+npm run e2e:playwright                       # All Playwright tests
+npm run e2e:playwright:screenshots           # Screenshots (local comparison)
+npm run e2e:playwright:update-screenshots    # Update baselines
+npm run e2e:playwright:screenshots:percy     # Screenshots with Percy
+npm run e2e:playwright:screenshots:smartui   # Screenshots with SmartUI
 
-# SaaS Visual Testing Vendors (works with both Playwright & Selenium)
-export $(grep -v '^#' .env.local | xargs)
-
-# Playwright with Percy/SmartUI
-npm run e2e:screenshots:percy # https://percy.io/
-npm run e2e:screenshots:smartui # https://smartui.lambdatest.com/
-
-# Selenium with Percy/SmartUI
-npm run e2e:selenium:screenshots:percy # https://percy.io/
-npm run e2e:selenium:screenshots:smartui # https://smartui.lambdatest.com/
+# Selenium Visual Tests  
+npm run e2e:selenium                         # All Selenium tests
+npm run e2e:selenium:screenshots             # Screenshots (local comparison)
+npm run e2e:selenium:update-screenshots      # Update baselines
+npm run e2e:selenium:screenshots:percy       # Screenshots with Percy
+npm run e2e:selenium:screenshots:smartui     # Screenshots with SmartUI
 ```
 
 ## 🗂️ Project Structure
@@ -57,17 +51,17 @@ e2e/
 │
 ├── Tests
 │   └── specs/
-│       ├── screenshot_tests.js
-│       ├── selenium_screenshot_tests.js
-│       └── test_app.js
+│       ├── playwright_screenshot_tests.js  (Playwright visual tests)
+│       ├── selenium_screenshot_tests.js    (Selenium visual tests)
+│       └── test_app.js                     (Functional tests)
 │
 └── Utils
-    ├── screenshot-base.js         Shared screenshot logic
-    ├── screenshots.js             Playwright screenshots
+    ├── screenshot-comparison.js   Shared comparison logic
+    ├── playwright-screenshots.js  Playwright screenshots
     ├── selenium-screenshots.js    Selenium screenshots
-    ├── percy-adapter-unified.js   Percy (both frameworks)
+    ├── percy-adapter.js           Percy integration
     ├── smartui-adapter.js         SmartUI integration
-    └── jest-setup.js              Unified test setup
+    └── jest-setup.js              Test setup & lifecycle
 ```
 
 See [SIMPLIFIED_STRUCTURE.md](./SIMPLIFIED_STRUCTURE.md) for architecture details.
@@ -79,6 +73,7 @@ This project uses explicit configuration files instead of hidden tooling:
 * `vite.config.js` - Build and dev server configuration
 * `jest.config.js` - Unit test configuration (explicitly loads `src/setupTests.js`)
 * `e2e/jest.config.js` - E2E test configuration
+* `__mocks__/` - Jest mocks for CSS/images (so unit tests don't crash on non-JS imports)
 * Test patterns specified via CLI flags in `package.json` scripts
 
 
