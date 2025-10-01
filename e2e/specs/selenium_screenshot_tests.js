@@ -29,12 +29,28 @@ describe("Selenium Visual Regression Tests", () => {
     afterEach(async () => { await cleanup(); }, 5000);
 
     it("should match the full page screenshot", async () => {
+        // Disable spinning animation
+        await driver.executeScript(`
+            const logo = document.querySelector('.App-logo');
+            if (logo) {
+                logo.style.animation = 'none';
+                logo.style.transform = 'rotate(0deg)';
+            }
+        `);
         await driver.sleep(1000);
         const capture = await captureScreenshot(driver, 'Selenium - Full page');
         expectMatch('Selenium - Full page', await compareDiff(capture));
     });
 
     it("should match the header section screenshot", async () => {
+        // Disable spinning animation
+        await driver.executeScript(`
+            const logo = document.querySelector('.App-logo');
+            if (logo) {
+                logo.style.animation = 'none';
+                logo.style.transform = 'rotate(0deg)';
+            }
+        `);
         await driver.sleep(500);
         const capture = await captureElementScreenshot(driver, '.App-header', 'Selenium - Header section');
         expectMatch('Selenium - Header section', await compareDiff(capture));
@@ -60,6 +76,14 @@ describe("Selenium Visual Regression Tests", () => {
     });
 
     it("should match the mobile viewport screenshot", async () => {
+        // Disable spinning animation
+        await driver.executeScript(`
+            const logo = document.querySelector('.App-logo');
+            if (logo) {
+                logo.style.animation = 'none';
+                logo.style.transform = 'rotate(0deg)';
+            }
+        `);
         await driver.sleep(1000);
         const capture = await captureScreenshot(driver, 'Selenium - Mobile viewport');
         expectMatch('Selenium - Mobile viewport', await compareDiff(capture));

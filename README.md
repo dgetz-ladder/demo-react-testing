@@ -53,9 +53,7 @@ e2e/
 ├── Config
 │   ├── playwright.config.js      Playwright settings
 │   ├── selenium.config.js        Selenium settings
-│   ├── jest-base.config.js       Shared base configuration
-│   ├── jest.config.js            Playwright test config
-│   └── jest-selenium.config.js   Selenium test config
+│   └── jest.config.js            Jest configuration (CLI flags specify test patterns)
 │
 ├── Tests
 │   └── specs/
@@ -74,20 +72,33 @@ e2e/
 
 See [SIMPLIFIED_STRUCTURE.md](./SIMPLIFIED_STRUCTURE.md) for architecture details.
 
+## Architecture Notes
+
+**Explicit Configuration:**
+This project uses explicit configuration files instead of hidden tooling:
+* `vite.config.js` - Build and dev server configuration
+* `jest.config.js` - Unit test configuration (explicitly loads `src/setupTests.js`)
+* `e2e/jest.config.js` - E2E test configuration
+* Test patterns specified via CLI flags in `package.json` scripts
+
+
 ## Release notes
 * Warning: Playwright's `slowMo` setting can be temperamental, and if set too high the tests often fail. The consistency of `slowMo` also seems to vary from browser to browser.
 
 ## Technologies
 
-* [`playwright`](https://github.com/microsoft/playwright) - Cross-browser automation with methods to interact with pages, fill forms, simulate keystrokes and mouse actions
+**Build & Dev:**
+* [`vite`](https://vitejs.dev/) - Fast build tool and dev server with explicit configuration
+* [`@vitejs/plugin-react`](https://github.com/vitejs/vite-plugin-react) - Official React plugin for Vite
+
+**Testing:**
+* [`jest`](https://github.com/jestjs/jest) - Test runner and assertion library with explicit configuration
+* [`playwright`](https://github.com/microsoft/playwright) - Cross-browser automation framework
 * [`selenium-webdriver`](https://www.selenium.dev/documentation/webdriver/) - Browser automation framework (alternative to Playwright)
-* [`jest`](https://github.com/jestjs/jest) - Test runner and assertion library
+* [`@testing-library/react`](https://github.com/testing-library/react-testing-library) - React unit testing library
 * `pixelmatch` & `pngjs` - Image comparison for local screenshot testing
-* [`@percy/playwright`](https://docs.percy.io/docs/playwright) - BrowserStack Percy for visual regression testing
+
+**Visual Regression Testing:**
+* [`@percy/playwright`](https://docs.percy.io/docs/playwright) - BrowserStack Percy for Playwright
 * [`@percy/selenium-webdriver`](https://docs.percy.io/docs/selenium-webdriver-for-javascript) - BrowserStack Percy for Selenium
-* [`@testing-library/react`](https://github.com/testing-library/react-testing-library) - Official React unit testing library
-
-
-- `@percy/cli` - Percy command-line interface
-- `@percy/playwright` - Percy SDK for Playwright
-- Percy.io, requires token
+* `@lambdatest/smartui-cli` - LambdaTest SmartUI for visual testing
