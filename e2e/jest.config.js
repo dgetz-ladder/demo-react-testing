@@ -1,7 +1,7 @@
 // Base Jest configuration shared by both Playwright and Selenium tests
 module.exports = {
     globals: {
-      baseURL: "http://localhost:3000",
+      baseURL: process.env.BASE_URL || "http://localhost:3000",
       screenshotConfig: {
         screenshotsDir: process.env.SCREENSHOTS_DIR || "screenshots",
         baselineDir: process.env.BASELINE_DIR || "baseline", 

@@ -45,7 +45,8 @@ const captureElementScreenshot = async (page, selector, testName, options = {}) 
     if (!element) throw new Error(`Element not found: ${selector}`);
     
     await disableElementAnimations(page, selector);
-    await element.waitForElementState('stable');
+    // Wait a bit for CSS to take effect, then get fresh element handle
+    await page.waitForTimeout(200);
     
     // Store context for Percy
     currentPage = page;

@@ -2,21 +2,31 @@
 const { createDriver, By, until } = require('../selenium.config');
 const { captureScreenshot, captureElementScreenshot, compareDiff, expectMatch, disableElementAnimations } = require('../utils/selenium-screenshots');
 
+const { USE_LAMBDATEST_GRID, USE_BROWSERSTACK_GRID, GRID_BROWSER = 'chrome' } = process.env;
+
 let driver;
 
 const load = async () => {
-    driver = await createDriver(true); // true = mobile viewport (iPhone 6)
+    // For grid testing, use the GRID_BROWSER env var; for local, use mobile viewport
+    const isGrid = USE_LAMBDATEST_GRID === 'true' || USE_BROWSERSTACK_GRID === 'true';
+    driver = await createDriver(!isGrid, GRID_BROWSER); // true = mobile viewport (iPhone 6) for local
+    
+    if (isGrid) {
+        const gridType = USE_BROWSERSTACK_GRID === 'true' ? 'BrowserStack' : 'LambdaTest';
+        console.log(`[Selenium Grid] Running on ${gridType} browser: ${GRID_BROWSER}`);
+    }
+    
     await driver.get(baseURL);
-    await driver.sleep(2000); // Wait for page to load i.e. network idle
-    const rootElement = await driver.wait(until.elementLocated(By.css('#root')), 10000);
-    await driver.wait(until.elementIsVisible(rootElement), 10000);
+    await driver.sleep(5000); // Wait for page to load (longer for remote grid with tunnel)
+    const rootElement = await driver.wait(until.elementLocated(By.css('#root')), 30000); // Increased for remote grid
+    await driver.wait(until.elementIsVisible(rootElement), 30000); // Increased for remote grid
 };
 
 const cleanup = async () => driver && await driver.quit();
 
 describe("Selenium Visual Regression Tests", () => {
-    beforeEach(async () => { await load(); }, 15000); // Increased timeout for browser startup
-    afterEach(async () => { await cleanup(); }, 5000);
+    beforeEach(async () => { await load(); }, 60000); // Increased timeout for remote grid browser startup
+    afterEach(async () => { await cleanup(); }, 10000);
 
     it("should match the full page screenshot", async () => {
         await disableElementAnimations(driver, '.App-logo');

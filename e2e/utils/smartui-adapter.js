@@ -6,6 +6,29 @@ const execAsync = promisify(exec);
 
 const { LT_USERNAME, LT_ACCESS_KEY, SMARTUI_PROJECT_NAME = 'react-app-screenshots' } = process.env;
 
+/**
+ * LambdaTest SmartUI Browser Grid Functionality:
+ * 
+ * SmartUI provides two approaches for cross-browser visual testing:
+ * 
+ * 1. Local Screenshot Upload (current implementation):
+ *    - Capture screenshots locally using Selenium/Playwright
+ *    - Upload to SmartUI for visual comparison
+ *    - Useful when you want to control the exact test environment
+ * 
+ * 2. Remote Browser Grid Execution (via USE_LAMBDATEST_GRID):
+ *    - Run tests directly on LambdaTest's cloud browsers
+ *    - Tests execute on real browsers in LambdaTest's infrastructure
+ *    - Supports Chrome, Firefox, Safari, Edge, mobile browsers
+ *    - Configure browsers via selenium.config.js or playwright.config.js
+ *    - Screenshots taken on remote browsers can still be uploaded to SmartUI
+ * 
+ * To use the browser grid:
+ * - Set USE_LAMBDATEST_GRID=true
+ * - Tests will run on LambdaTest's cloud infrastructure
+ * - Each browser is configured with platform, version, and resolution
+ */
+
 // Track all screenshots for batch upload
 let allScreenshots = [];
 let uploadExecuted = false;
