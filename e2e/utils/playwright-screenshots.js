@@ -1,12 +1,6 @@
-// supports both Percy and SmartUI
+// Playwright screenshot utilities for Percy visual testing
 
-const fs = require('fs');
-const path = require('path');
-const { ensureDirectories, routeComparison, expectMatch, ACTUAL_DIR } = require('./screenshot-comparison');
-
-// Store page context for Percy
-let currentPage = null;
-let currentSelector = null;
+const { takePercySnapshot } = require('./percy-adapter');
 
 const disableElementAnimations = async (page, selector) => {
     await page.evaluate((sel) => {
@@ -20,54 +14,29 @@ const disableElementAnimations = async (page, selector) => {
     }, selector);
 };
 
-const captureScreenshot = async (page, testName, options = {}) => {
-    const fileName = `${testName}.png`;
-    const actualPath = path.join(ACTUAL_DIR, fileName);
-
-    ensureDirectories();
-
-    // Store page for Percy
-    currentPage = page;
-    currentSelector = null;
-
-    await page.screenshot({ 
-        fullPage: true, 
-        animations: 'disabled', 
-        ...options, 
-        path: actualPath 
-    });
-
-    return { testName, fileName, actualPath };
+const takeSnapshot = async (page, testName, options = {}) => {
+    // Percy is always used (via 'percy exec' wrapper in npm script)
+    await takePercySnapshot(page, testName, options);
+    return { testName, captured: true };
 };
 
-const captureElementScreenshot = async (page, selector, testName, options = {}) => {
+const takeElementSnapshot = async (page, selector, testName, options = {}) => {
     const element = await page.$(selector);
     if (!element) throw new Error(`Element not found: ${selector}`);
     
     await disableElementAnimations(page, selector);
-    // Wait a bit for CSS to take effect, then get fresh element handle
+    // Wait a bit for CSS to take effect
     await page.waitForTimeout(200);
     
-    // Store context for Percy
-    currentPage = page;
-    currentSelector = selector;
-    
-    const boundingBox = await element.boundingBox();
-    return await captureScreenshot(page, testName, {
-        clip: boundingBox,
-        animations: 'disabled',
-        ...options
+    // Use Percy with element scope
+    return await takeSnapshot(page, testName, {
+        ...options,
+        scope: selector
     });
 };
 
-const compareDiff = async (capture) => {
-    return await routeComparison(capture, currentPage, currentSelector);
-};
-
 module.exports = {
-    captureScreenshot,
-    captureElementScreenshot,
-    compareDiff,
-    expectMatch,
+    takeSnapshot,
+    takeElementSnapshot,
     disableElementAnimations
 };

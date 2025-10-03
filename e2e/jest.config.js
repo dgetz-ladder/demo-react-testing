@@ -1,13 +1,7 @@
-// Base Jest configuration shared by both Playwright and Selenium tests
+// Jest configuration for Playwright E2E tests with Percy
 module.exports = {
     globals: {
-      baseURL: process.env.BASE_URL || "http://localhost:3000",
-      screenshotConfig: {
-        screenshotsDir: process.env.SCREENSHOTS_DIR || "screenshots",
-        baselineDir: process.env.BASELINE_DIR || "baseline", 
-        actualDir: process.env.ACTUAL_DIR || "actual",
-        diffDir: process.env.DIFF_DIR || "diff"
-      }
+      baseURL: process.env.BASE_URL || "http://localhost:3000"
     },
     testMatch: ["**/specs/**/*.js"],
     transform: {
